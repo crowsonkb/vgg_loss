@@ -10,13 +10,17 @@ import vgg_loss
 
 def main():
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+
     crit = vgg_loss.VGGLoss().to(device)
     crit_tv = vgg_loss.TVLoss(p=2)
+
     target = tio.read_image('DSC00261.jpg')[None] / 255
     target = TF.resize(target, (256, 256), 3).to(device)
     target_act = crit.get_features(target)
+
     input = torch.rand_like(target) / 255 + 0.5
     input.requires_grad_(True)
+
     opt = optim.Adam([input], lr=0.025)
 
     try:
