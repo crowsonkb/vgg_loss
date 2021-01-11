@@ -18,7 +18,7 @@ class TVLoss(nn.Module):
 
     :attr:`reduction` can be set to ``'mean'``, ``'sum'``, or ``'none'``
     similarly to the loss functions in :mod:`torch.nn`. The default is
-    ``mean``.
+    ``'mean'``.
     """
 
     def __init__(self, p, reduction='mean'):
@@ -47,7 +47,7 @@ class VGGLoss(nn.Module):
 
     :attr:`reduction` can be set to ``'mean'``, ``'sum'``, or ``'none'``
     similarly to the loss functions in :mod:`torch.nn`. The default is
-    ``mean``.
+    ``'mean'``.
 
     :meth:`get_features()` may be used to precompute the features for the
     target, to speed up the case where inputs are compared against the same
