@@ -1,3 +1,5 @@
+"""Total variation image denoising using the VGG perceptual loss."""
+
 import torch
 from torch import nn, optim
 from torchvision import io as tio

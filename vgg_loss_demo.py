@@ -1,3 +1,5 @@
+"""Reconstruction of a target image from the VGG perceptual loss."""
+
 import torch
 from torch import optim
 from torchvision import io as tio

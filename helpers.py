@@ -1,3 +1,5 @@
+"""Helper functions for the VGG perceptual loss."""
+
 import torch
 
 

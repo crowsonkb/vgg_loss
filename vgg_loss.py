@@ -1,3 +1,5 @@
+"""A VGG-based perceptual loss function for PyTorch."""
+
 import torch
 from torch import nn
 from torchvision import models, transforms
