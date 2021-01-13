@@ -2,6 +2,7 @@
 
 import torch
 from torch import nn
+from torch.nn import functional as F
 from torchvision import models, transforms
 
 
@@ -46,6 +47,12 @@ class VGGLoss(nn.Module):
     ``(B, 3, H, W)`` and must have equivalent shapes. Pixel values should be
     normalized to the range 0–1. H and W must be at least 2.
 
+    If :attr:`shift` is nonzero, a random shift of at most :attr:`shift`
+    pixels in both height and width will be applied to all images in the input
+    and target. The shift will only be applied when the loss function is in
+    training mode, and will not be applied if a precomputed feature map is
+    supplied as the target.
+
     :attr:`reduction` can be set to ``'mean'``, ``'sum'``, or ``'none'``
     similarly to the loss functions in :mod:`torch.nn`. The default is
     ``'mean'``.
@@ -59,8 +66,9 @@ class VGGLoss(nn.Module):
     device and dtype as their inputs.
     """
 
-    def __init__(self, reduction='mean'):
+    def __init__(self, shift=0, reduction='mean'):
         super().__init__()
+        self.shift = shift
         self.normalize = transforms.Normalize(mean=[0.485, 0.456, 0.406],
                                               std=[0.229, 0.224, 0.225])
         self.model = models.vgg16(pretrained=True).features[:9]
@@ -71,6 +79,9 @@ class VGGLoss(nn.Module):
     def get_features(self, input):
         return self.model(self.normalize(input))
 
+    def train(self, mode=True):
+        self.training = mode
+
     def forward(self, input, target, target_is_features=False):
         if target_is_features:
             input_feats = self.get_features(input)
@@ -78,6 +89,9 @@ class VGGLoss(nn.Module):
         else:
             sep = input.shape[0]
             batch = torch.cat([input, target])
+            if self.shift and self.training:
+                padded = F.pad(batch, [self.shift] * 4, mode='replicate')
+                batch = transforms.RandomCrop(batch.shape[2:])(padded)
             feats = self.get_features(batch)
             input_feats, target_feats = feats[:sep], feats[sep:]
         return self.loss(input_feats, target_feats)
