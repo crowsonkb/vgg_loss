@@ -3,6 +3,16 @@
 import torch
 
 
+def inspect_outputs(module):
+    """Registers hooks on each submodule that print their outputs."""
+
+    def make_hook(name):
+        return lambda m, i, o: print(f'({name}) {type(m).__name__}: {o}')
+
+    for name, mod in module.named_children():
+        mod.register_forward_hook(make_hook(name))
+
+
 def batchify_image(input):
     """Promotes the input tensor (an image or a batch of images) to a 4D tensor
     with three channels, if it is not already. Strips alpha channels if
