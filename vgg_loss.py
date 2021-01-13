@@ -9,7 +9,8 @@ class TVLoss(nn.Module):
     """Total variation loss (Lp penalty on image gradient magnitude).
 
     The input must be at least 2D and at least 2x2. Multichannel images and
-    batches are supported.
+    batches are supported. If a target (second parameter) is passed in, it is
+    ignored.
 
     ``p=1`` yields the originally proposed (isotropic) 2D total variation
     norm (see https://en.wikipedia.org/wiki/Total_variation_denoising).
@@ -26,7 +27,7 @@ class TVLoss(nn.Module):
         self.p = p
         self.reduction = reduction
 
-    def forward(self, input):
+    def forward(self, input, target=None):
         x_diff = input[..., :-1, :-1] - input[..., :-1, 1:]
         y_diff = input[..., :-1, :-1] - input[..., 1:, :-1]
         diff = (x_diff**2 + y_diff**2 + 1e-8)**(self.p / 2)
