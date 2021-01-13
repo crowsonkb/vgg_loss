@@ -17,9 +17,9 @@ def main():
     tf = transforms.ToTensor()
     train_set = datasets.CIFAR10('data/cifar10', download=True, transform=tf)
     train_dl = data.DataLoader(train_set, batch_size=BATCH_SIZE, shuffle=True,
-                               pin_memory=True)
+                               num_workers=2, pin_memory=True)
     test_set = datasets.CIFAR10('data/cifar10', train=False, transform=tf)
-    test_dl = data.DataLoader(test_set, batch_size=BATCH_SIZE,
+    test_dl = data.DataLoader(test_set, batch_size=BATCH_SIZE, num_workers=2,
                               pin_memory=True)
 
     encoder = nn.Sequential(
