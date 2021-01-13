@@ -6,6 +6,33 @@ from torch.nn import functional as F
 from torchvision import models, transforms
 
 
+class Lambda(nn.Module):
+    """Wraps a callable in an :class:`nn.Module` without registering it."""
+
+    def __init__(self, func):
+        super().__init__()
+        object.__setattr__(self, 'forward', func)
+
+    def extra_repr(self):
+        return repr(self.forward)
+
+
+class WeightedLoss(nn.ModuleList):
+    """A weighted combination of multiple loss functions."""
+
+    def __init__(self, losses, weights):
+        super().__init__()
+        for loss in losses:
+            self.append(loss if isinstance(loss, nn.Module) else Lambda(loss))
+        self.weights = weights
+
+    def forward(self, *args, **kwargs):
+        losses = []
+        for loss, weight in zip(self, self.weights):
+            losses.append(loss(*args, **kwargs) * weight)
+        return sum(losses)
+
+
 class TVLoss(nn.Module):
     """Total variation loss (Lp penalty on image gradient magnitude).
 
