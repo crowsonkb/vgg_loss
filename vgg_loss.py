@@ -72,11 +72,12 @@ class VGGLoss(nn.Module):
 
     The input and target must be 4D tensors with three channels
     ``(B, 3, H, W)`` and must have equivalent shapes. Pixel values should be
-    normalized to the range 0–1. H and W must be at least 2.
+    normalized to the range 0–1.
 
     The VGG perceptual loss is the mean squared difference between the features
     computed for the input and target at layer :attr:`layer` (default 8, or
-    ``relu2_2``) of the VGG-16 pretrained model.
+    ``relu2_2``) of the pretrained model specified by :attr:`model` (either
+    ``'vgg16'`` (default) or ``'vgg19'``).
 
     If :attr:`shift` is nonzero, a random shift of at most :attr:`shift`
     pixels in both height and width will be applied to all images in the input
@@ -97,12 +98,14 @@ class VGGLoss(nn.Module):
     device and dtype as their inputs.
     """
 
-    def __init__(self, layer=8, shift=0, reduction='mean'):
+    models = {'vgg16': models.vgg16, 'vgg19': models.vgg19}
+
+    def __init__(self, model='vgg16', layer=8, shift=0, reduction='mean'):
         super().__init__()
         self.shift = shift
         self.normalize = transforms.Normalize(mean=[0.485, 0.456, 0.406],
                                               std=[0.229, 0.224, 0.225])
-        self.model = models.vgg16(pretrained=True).features[:layer+1]
+        self.model = self.models[model](pretrained=True).features[:layer+1]
         self.model.eval()
         self.model.requires_grad_(False)
         self.loss = nn.MSELoss(reduction=reduction)
