@@ -110,12 +110,12 @@ class VGGLoss(nn.Module):
     def __init__(self, model='vgg16', layer=8, shift=0, reduction='mean'):
         super().__init__()
         self.shift = shift
+        self.reduction = reduction
         self.normalize = transforms.Normalize(mean=[0.485, 0.456, 0.406],
                                               std=[0.229, 0.224, 0.225])
         self.model = self.models[model](pretrained=True).features[:layer+1]
         self.model.eval()
         self.model.requires_grad_(False)
-        self.loss = nn.MSELoss(reduction=reduction)
 
     def get_features(self, input):
         return self.model(self.normalize(input))
@@ -135,4 +135,4 @@ class VGGLoss(nn.Module):
                 batch = transforms.RandomCrop(batch.shape[2:])(padded)
             feats = self.get_features(batch)
             input_feats, target_feats = feats[:sep], feats[sep:]
-        return self.loss(input_feats, target_feats)
+        return F.mse_loss(input_feats, target_feats, reduction=self.reduction)
