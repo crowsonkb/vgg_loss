@@ -20,16 +20,23 @@ class Lambda(nn.Module):
 class WeightedLoss(nn.ModuleList):
     """A weighted combination of multiple loss functions."""
 
-    def __init__(self, losses, weights):
+    def __init__(self, losses, weights, verbose=False):
         super().__init__()
         for loss in losses:
             self.append(loss if isinstance(loss, nn.Module) else Lambda(loss))
         self.weights = weights
+        self.verbose = verbose
+
+    def _print_losses(self, losses):
+        for i, loss in enumerate(losses):
+            print(f'({i}) {type(self[i]).__name__}: {loss.item()}')
 
     def forward(self, *args, **kwargs):
         losses = []
         for loss, weight in zip(self, self.weights):
             losses.append(loss(*args, **kwargs) * weight)
+        if self.verbose:
+            self._print_losses(losses)
         return sum(losses)
 
 
