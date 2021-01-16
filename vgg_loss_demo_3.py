@@ -1,3 +1,5 @@
+#!/usr/bin/env python3
+
 """An autoencoder using the VGG perceptual loss."""
 
 import torch
@@ -13,6 +15,7 @@ EPOCHS = 100
 
 def main():
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+    print('Using device:', device)
 
     tf = transforms.ToTensor()
     train_set = datasets.CIFAR10('data/cifar10', download=True, transform=tf)

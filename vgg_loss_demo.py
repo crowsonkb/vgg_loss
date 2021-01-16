@@ -1,3 +1,5 @@
+#!/usr/bin/env python3
+
 """Reconstruction of a target image from the VGG perceptual loss."""
 
 import torch
@@ -10,6 +12,7 @@ import vgg_loss
 
 def main():
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+    print('Using device:', device)
 
     crit_vgg = vgg_loss.VGGLoss().to(device)
     crit_tv = vgg_loss.TVLoss(p=2)
