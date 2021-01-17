@@ -63,6 +63,7 @@ class TVLoss(nn.Module):
         self.reduction = reduction
 
     def forward(self, input, target=None):
+        input = F.pad(input, (0, 1, 0, 1), 'replicate')
         x_diff = input[..., :-1, :-1] - input[..., :-1, 1:]
         y_diff = input[..., :-1, :-1] - input[..., 1:, :-1]
         diff = (x_diff**2 + y_diff**2 + 1e-8)**(self.p / 2)
