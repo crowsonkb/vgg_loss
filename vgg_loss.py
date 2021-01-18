@@ -43,8 +43,7 @@ class WeightedLoss(nn.ModuleList):
 class TVLoss(nn.Module):
     """Total variation loss (Lp penalty on image gradient magnitude).
 
-    The input must be at least 2D and at least 2x2. Multichannel images and
-    batches are supported. If a target (second parameter) is passed in, it is
+    The input must be 4D. If a target (second parameter) is passed in, it is
     ignored.
 
     ``p=1`` yields the originally proposed (isotropic) 2D total variation
@@ -57,22 +56,22 @@ class TVLoss(nn.Module):
     ``'mean'``.
     """
 
-    def __init__(self, p, reduction='mean'):
+    def __init__(self, p, reduction='mean', eps=1e-8):
         super().__init__()
         self.p = p
         self.reduction = reduction
+        self.eps = eps
 
     def forward(self, input, target=None):
         input = F.pad(input, (0, 1, 0, 1), 'replicate')
         x_diff = input[..., :-1, :-1] - input[..., :-1, 1:]
         y_diff = input[..., :-1, :-1] - input[..., 1:, :-1]
-        diff = (x_diff**2 + y_diff**2 + 1e-8)**(self.p / 2)
-        if self.reduction == 'none':
-            return diff
-        out = torch.sum(diff)
+        diff = (x_diff**2 + y_diff**2 + self.eps)**(self.p / 2)
         if self.reduction == 'mean':
-            out /= input.numel()
-        return out
+            return diff.mean()
+        if self.reduction == 'sum':
+            return diff.sum()
+        return diff
 
 
 class VGGLoss(nn.Module):
