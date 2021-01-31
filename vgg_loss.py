@@ -14,7 +14,7 @@ class Lambda(nn.Module):
         object.__setattr__(self, 'forward', func)
 
     def extra_repr(self):
-        return repr(self.forward)
+        return getattr(self.forward, '__name__', type(self.forward).__name__) + '()'
 
 
 class WeightedLoss(nn.ModuleList):
